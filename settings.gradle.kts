@@ -24,3 +24,9 @@ dependencyResolutionManagement {
 
 rootProject.name = "PlaceShare"
 include(":app")
+
+include(":core:domain")
+include(":core:data")
+include(":core:network")
+include(":core:database")
+include(":core:ui")
