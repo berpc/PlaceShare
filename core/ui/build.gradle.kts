@@ -6,11 +6,7 @@ plugins {
 android {
     namespace = "com.ramirezpenayo.placeshare.core.ui"
 
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 37
 
     defaultConfig {
         minSdk = 26
@@ -30,8 +26,14 @@ android {
 }
 
 dependencies {
-
     implementation(project(":core:domain"))
+
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.graphics)
+    implementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.compose.material3)
 
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
