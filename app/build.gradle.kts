@@ -36,6 +36,13 @@ android {
 }
 
 dependencies {
+    implementation(project(":feature:auth"))
+    implementation(project(":feature:home"))
+    implementation(project(":feature:places"))
+    implementation(project(":feature:explore"))
+    implementation(project(":feature:visits"))
+    implementation(project(":feature:profile"))
+
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
