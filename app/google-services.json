@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "422437711174",
+    "project_id": "placeshare-c9325",
+    "storage_bucket": "placeshare-c9325.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:422437711174:android:50dd280f8b75d2cd520947",
+        "android_client_info": {
+          "package_name": "com.ramirezpenayo.placeshare"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "422437711174-0v6aj4ehj44bmkg8m0ga6h0qq0tadnpv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ramirezpenayo.placeshare",
+            "certificate_hash": "7598f0b6da94bd345ec63ec5d100302fe83d3a71"
+          }
+        },
+        {
+          "client_id": "422437711174-i124r2qu6pu2ehbtuoqt5rh62ef1pu1f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3Tpzkf9SzXd29TTu95mXQHLOFRVZSJOY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "422437711174-i124r2qu6pu2ehbtuoqt5rh62ef1pu1f.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
