@@ -9,24 +9,31 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-
+import com.ramirezpenayo.placeshare.core.ui.theme.DarkPrimary
+import com.ramirezpenayo.placeshare.core.ui.theme.WhitePrimary
 
 private val DarkColorScheme = darkColorScheme(
     primary = DarkPrimary,
     secondary = DarkLight,
     tertiary = BluePrimary,
+    onSurfaceVariant = WhitePrimary,
+    onPrimary = WhitePrimary,
+    onSecondary = DarkPrimary
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = WhitePrimary,
     secondary = WhiteLight,
     tertiary = BluePrimary,
+    onSurfaceVariant = DarkPrimary,
+    onPrimary = WhitePrimary,
+    onSecondary = DarkPrimary
 )
 
 @Composable
 fun MyApplicationTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

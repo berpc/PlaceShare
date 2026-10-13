@@ -1,0 +1,7 @@
+<resources>
+    <string name="core_ui_retry">Reintentar</string>
+    <string name="core_ui_error_network">No se pudo conectar con el servidor</string>
+    <string name="core_ui_not_found">El recurso solicitado no fue encontrado</string>
+    <string name="core_ui_empty_location">La ubicación no puede estar vacía</string>
+    <string name="core_ui_unknown">Error desconocido</string>
+</resources>
