@@ -1,12 +1,12 @@
 plugins {
     alias(libs.plugins.android.library)
-
-
 }
 
 android {
-    namespace = "com.ramirezpenayo.features"
-    compileSdk = 37
+    namespace = "com.ramirezpenayo.src"
+    compileSdk {
+        version = release(37)
+    }
 
     defaultConfig {
         minSdk = 26
