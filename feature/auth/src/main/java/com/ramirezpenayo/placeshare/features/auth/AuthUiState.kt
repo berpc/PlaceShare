@@ -1,4 +1,4 @@
-package com.ramirezpenayo.placeshare.features.auth
+package com.ramirezpenayo.placeshare.feature.auth
 
 import com.google.firebase.auth.FirebaseUser
 import com.ramirezpenayo.placeshare.core.domain.model.DomainError

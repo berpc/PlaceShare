@@ -1,4 +1,4 @@
-package com.ramirezpenayo.placeshare.features.auth.di
+package com.ramirezpenayo.placeshare.core.data.di
 
 import com.google.firebase.auth.FirebaseAuth
 import dagger.Module

@@ -1,4 +1,4 @@
-package com.ramirezpenayo.placeshare.features.auth
+package com.ramirezpenayo.placeshare.core.domain.model.repository
 
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.AuthResult
