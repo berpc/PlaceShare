@@ -55,7 +55,10 @@ dependencies {
 
 
     implementation(project(":feature:auth"))
+    implementation(project(":feature:home"))
     implementation(project(":core:ui"))
+    implementation(project(":core:data"))
+    implementation(project(":core:domain"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)

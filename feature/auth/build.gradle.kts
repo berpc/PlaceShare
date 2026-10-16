@@ -2,13 +2,12 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt.android)
 }
 
 android {
-    namespace = "com.ramirezpenayo.placeshare.features.auth"
-    compileSdk {
-        version = release(37)
-    }
+    namespace = "com.ramirezpenayo.placeshare.feature.auth"
+    compileSdk = 37
 
     defaultConfig {
         minSdk = 26

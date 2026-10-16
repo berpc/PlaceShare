@@ -33,7 +33,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramirezpenayo.placeshare.core.ui.components.LoadingContent
 import com.ramirezpenayo.placeshare.core.ui.components.asMessage
-import com.ramirezpenayo.placeshare.features.auth.AuthUiState
+import com.ramirezpenayo.placeshare.feature.auth.AuthUiState
+import com.ramirezpenayo.placeshare.feature.auth.AuthViewModel
+
 
 @Composable
 fun AuthRoute(
@@ -45,13 +47,18 @@ fun AuthRoute(
     val googleSignInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
+        android.util.Log.d("AuthScreen", "Google Sign-In Launcher Result code: ${result.resultCode}, data: ${result.data}")
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.let(viewModel::onGoogleSignInResult)
+        } else {
+            android.util.Log.e("AuthScreen", "Google Sign-In Launcher returned non-OK result: ${result.resultCode}")
         }
     }
 
     LaunchedEffect(uiState) {
+        android.util.Log.d("AuthScreen", "uiState changed to: $uiState")
         if (uiState is AuthUiState.Success) {
+            android.util.Log.d("AuthScreen", "Calling onAuthSuccess()")
             onAuthSuccess()
         }
     }
@@ -59,7 +66,7 @@ fun AuthRoute(
     AuthScreen(
         uiState = uiState,
         onGoogleSignInClick = {
-            googleSignInLauncher.launch(viewModel.googleSignInIntent)
+            googleSignInLauncher.launch(viewModel.getGoogleSignInIntent())
         }
     )
 }
