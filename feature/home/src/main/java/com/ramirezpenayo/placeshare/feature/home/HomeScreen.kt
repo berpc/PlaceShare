@@ -17,9 +17,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.ramirezpenayo.placeshare.feature.profile.navigation.ProfileNavGraph
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    onNavigateToThemeSettings: () -> Unit,
+    onSignOutSuccess: () -> Unit,
+) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val rutaActual = backStackEntry?.destination?.route
@@ -58,7 +62,10 @@ fun HomeScreen() {
                 PantallaTemporal("Explorar")
             }
             composable(HomeTab.Profile.route) {
-                PantallaTemporal("Perfil")
+                ProfileNavGraph(
+                    onNavigateToThemeSettings = onNavigateToThemeSettings,
+                    onSignOutSuccess = onSignOutSuccess
+                )
             }
         }
     }

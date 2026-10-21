@@ -29,5 +29,5 @@ fun LoadingContent(
 @Preview(showBackground = true)
 @Composable
 private fun LoadingContentPreview() {
-    MyApplicationTheme() { LoadingContent() }
+    MyApplicationTheme(darkTheme = false) { LoadingContent() }
 }

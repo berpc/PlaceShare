@@ -11,10 +11,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -33,9 +32,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramirezpenayo.placeshare.core.ui.components.LoadingContent
 import com.ramirezpenayo.placeshare.core.ui.components.asMessage
-import com.ramirezpenayo.placeshare.feature.auth.AuthUiState
-import com.ramirezpenayo.placeshare.feature.auth.AuthViewModel
-
 
 @Composable
 fun AuthRoute(
@@ -47,18 +43,13 @@ fun AuthRoute(
     val googleSignInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        android.util.Log.d("AuthScreen", "Google Sign-In Launcher Result code: ${result.resultCode}, data: ${result.data}")
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.let(viewModel::onGoogleSignInResult)
-        } else {
-            android.util.Log.e("AuthScreen", "Google Sign-In Launcher returned non-OK result: ${result.resultCode}")
         }
     }
 
     LaunchedEffect(uiState) {
-        android.util.Log.d("AuthScreen", "uiState changed to: $uiState")
         if (uiState is AuthUiState.Success) {
-            android.util.Log.d("AuthScreen", "Calling onAuthSuccess()")
             onAuthSuccess()
         }
     }
@@ -117,7 +108,7 @@ fun AuthScreen(
                                 text = "PlaceShare",
                                 style = MaterialTheme.typography.displayMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.tertiary
+                                color = MaterialTheme.colorScheme.primary
                             )
 
                             Spacer(modifier = Modifier.height(12.dp))
@@ -148,12 +139,12 @@ fun GoogleSignInButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    OutlinedButton(
+    Button(
         onClick = onClick,
-        modifier = modifier.height(50.dp),
+        modifier = modifier.height(52.dp),
         shape = MaterialTheme.shapes.medium,
-        colors = ButtonDefaults.outlinedButtonColors(
-            containerColor = MaterialTheme.colorScheme.onPrimary,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary
         )
     ) {
@@ -162,15 +153,12 @@ fun GoogleSignInButton(
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Spacer(modifier = Modifier.width(8.dp))
-
             Text(
                 text = "Continuar con Google",
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSecondary
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimary
             )
         }
     }
 }
-

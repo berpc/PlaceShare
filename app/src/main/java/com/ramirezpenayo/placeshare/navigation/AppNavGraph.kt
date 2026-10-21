@@ -34,7 +34,18 @@ fun AppNavGraph() {
             )
         }
         composable(Rutas.HOME) {
-            HomeScreen()
+            HomeScreen(
+                onNavigateToThemeSettings = {
+                    // TODO: Aquí luego puedes navegar a la pantalla de configuración de tema si lo deseas
+                },
+                onSignOutSuccess = {
+                    // Cerramos sesión en Firebase y volvemos a la pantalla de Auth limpiando el historial
+                    FirebaseAuth.getInstance().signOut()
+                    navController.navigate(Rutas.AUTH) {
+                        popUpTo(Rutas.HOME) { inclusive = true }
+                    }
+                }
+            )
         }
     }
 }
