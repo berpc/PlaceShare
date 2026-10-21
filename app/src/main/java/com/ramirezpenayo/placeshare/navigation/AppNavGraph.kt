@@ -32,6 +32,7 @@ fun AppNavGraph() {
                 }
             )
         }
+
         composable(Rutas.HOME) {
             HomeScreen(
                 onNavigateToThemeSettings = {
