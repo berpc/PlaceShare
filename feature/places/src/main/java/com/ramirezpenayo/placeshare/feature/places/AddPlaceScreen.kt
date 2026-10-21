@@ -31,6 +31,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.res.stringResource
+import com.ramirezpenayo.placeshare.feature.places.R
+import android.widget.Toast
+import android.net.Uri
+import androidx.core.content.FileProvider
+import java.io.File
 
 @Composable
 fun AddPlaceScreen(
@@ -40,7 +46,7 @@ fun AddPlaceScreen(
     val context = LocalContext.current
     var title by remember { mutableStateOf("") }
     var note by remember { mutableStateOf("") }
-    var isPublic by remember { mutableStateOf(true) }
+    var isPublic by remember { mutableStateOf(false) }
     val saving by viewModel.saving.collectAsState()
     val error by viewModel.error.collectAsState()
     val locationText by viewModel.locationText.collectAsState()
@@ -48,6 +54,53 @@ fun AddPlaceScreen(
     val pickPhoto = rememberLauncherForActivityResult(
         ActivityResultContracts.PickVisualMedia()
     ) { uri -> viewModel.setPhoto(uri) }
+    var pendingCameraUri by remember { mutableStateOf<Uri?>(null) }
+
+    val takePicture = rememberLauncherForActivityResult(
+        ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success) pendingCameraUri?.let { viewModel.setPhoto(it) }
+    }
+
+    val launchCamera = {
+        try {
+            val imagesDir = File(context.cacheDir, "camera_photos")
+            if (!imagesDir.exists()) {
+                imagesDir.mkdirs()
+            }
+            val file = File(imagesDir, "camera_${System.currentTimeMillis()}.jpg")
+            if (!file.exists()) {
+                file.createNewFile()
+            }
+            val uri = FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                file
+            )
+            pendingCameraUri = uri
+            takePicture.launch(uri)
+        } catch (e: Exception) {
+            Toast.makeText(
+                context,
+                "Error al abrir la cámara: ${e.localizedMessage}",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    val cameraPermission = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            launchCamera()
+        } else {
+            Toast.makeText(
+                context,
+                "Se requiere permiso de cámara para tomar fotos",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -76,13 +129,15 @@ fun AddPlaceScreen(
     }
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text("Agregar lugar", style = MaterialTheme.typography.headlineMedium)
+        Text(stringResource(R.string.agregar_lugar), style = MaterialTheme.typography.headlineMedium)
 
         Text(
-            text = "Ubicación: $locationText",
+            text = stringResource(R.string.ubicacion, locationText),
             style = MaterialTheme.typography.bodyMedium
         )
 
@@ -94,17 +149,32 @@ fun AddPlaceScreen(
                     )
                 )
             }) {
-                Text(if (photoUri == null) "Elegir foto" else "Cambiar foto")
+                Text(if (photoUri == null) stringResource(R.string.elegir_foto) else stringResource(
+                    R.string.cambiar_foto
+                ))
             }
             if (photoUri != null) {
-                Text("Foto seleccionada", style = MaterialTheme.typography.bodySmall)
+                Text(stringResource(R.string.foto_seleccionada), style = MaterialTheme.typography.bodySmall)
             }
         }
+        TextButton(onClick = {
+            val hasPermission = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
 
+            if (hasPermission) {
+                launchCamera()
+            } else {
+                cameraPermission.launch(Manifest.permission.CAMERA)
+            }
+        }) {
+            Text(stringResource(R.string.tomar_foto))
+        }
         OutlinedTextField(
             value = title,
             onValueChange = { title = it },
-            label = { Text("Título") },
+            label = { Text(stringResource(R.string.t_tulo)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
@@ -112,7 +182,7 @@ fun AddPlaceScreen(
         OutlinedTextField(
             value = note,
             onValueChange = { note = it },
-            label = { Text("Nota (opcional)") },
+            label = { Text(stringResource(R.string.nota_opcional)) },
             modifier = Modifier.fillMaxWidth(),
             minLines = 3
         )
@@ -125,7 +195,7 @@ fun AddPlaceScreen(
                 checked = isPublic,
                 onCheckedChange = { isPublic = it }
             )
-            Text("Hacer público este lugar")
+            Text(stringResource(R.string.hacer_p_blico_este_lugar))
         }
 
         error?.let {
@@ -145,7 +215,7 @@ fun AddPlaceScreen(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Guardar")
+                Text(stringResource(R.string.guardar))
             }
         }
     }

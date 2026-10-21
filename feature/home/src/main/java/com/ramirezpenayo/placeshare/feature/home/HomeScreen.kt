@@ -42,7 +42,7 @@ import androidx.navigation.navArgument
 import coil.compose.AsyncImage
 import com.ramirezpenayo.placeshare.feature.places.AddPlaceScreen
 import com.ramirezpenayo.placeshare.feature.profile.navigation.ProfileNavGraph
-
+import com.ramirezpenayo.placeshare.feature.explore.ExploreScreen
 @Composable
 fun HomeScreen(
     onNavigateToThemeSettings: () -> Unit = {},
@@ -82,8 +82,12 @@ fun HomeScreen(
             composable(HomeTab.Visits.route) {
                 VisitsNavHost()
             }
+            composable(HomeTab.Maps.route) {
+                //MapScreen()
+                PantallaTemporal("Mapa")
+            }
             composable(HomeTab.Explore.route) {
-                PantallaTemporal("Explorar")
+                ExploreScreen()
             }
             composable(HomeTab.Profile.route) {
                 ProfileNavGraph(

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="volver">Volver</string>
+    <string name="borrar_lugar">Borrar lugar</string>
+    <string name="borrar_este_lugar">¿Borrar este lugar?</string>
+    <string name="esta_acci_n_no_se_puede_deshacer">Esta acción no se puede deshacer.</string>
+    <string name="borrar">Borrar</string>
+    <string name="cancelar">Cancelar</string>
+</resources>

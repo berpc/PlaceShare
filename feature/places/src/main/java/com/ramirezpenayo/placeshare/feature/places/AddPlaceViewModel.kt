@@ -69,6 +69,7 @@ class AddPlaceViewModel : ViewModel() {
 
     fun savePlace(context: Context, title: String, note: String, isPublic: Boolean, onSaved: () -> Unit) {
         val uid = FirebaseAuth.getInstance().currentUser?.uid
+
         if (uid == null) {
             _error.value = "Tenés que iniciar sesión para guardar."
             return
@@ -89,7 +90,7 @@ class AddPlaceViewModel : ViewModel() {
                 }
 
                 val data = hashMapOf<String, Any>(
-                    "userId" to uid,
+                    "userId" to uid,"userName" to (FirebaseAuth.getInstance().currentUser?.displayName ?: "Usuario"),
                     "title" to title.trim(),
                     "note" to note.trim(),
                     "createdAt" to System.currentTimeMillis(),

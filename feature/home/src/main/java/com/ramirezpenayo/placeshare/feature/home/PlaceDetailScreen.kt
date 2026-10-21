@@ -23,6 +23,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.layout.ContentScale
 import coil.compose.AsyncImage
 import androidx.compose.foundation.layout.height
+import androidx.compose.ui.res.stringResource
+
 @Composable
 fun PlaceDetailScreen(
     placeId: String,
@@ -35,15 +37,19 @@ fun PlaceDetailScreen(
 
     if (place == null) {
         // Puede pasar un instante mientras carga, o si el lugar fue borrado.
-        Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-            Text("Lugar no encontrado", style = MaterialTheme.typography.bodyLarge)
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)) {
+            Text("Lugar no concentrate", style = MaterialTheme.typography.bodyLarge)
             TextButton(onClick = onBack) { Text("Volver") }
         }
         return
     }
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
 
     )
@@ -76,27 +82,27 @@ fun PlaceDetailScreen(
             ),
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Borrar lugar")
+            Text(stringResource(R.string.borrar_lugar))
         }
         TextButton(onClick = onBack, modifier = Modifier.fillMaxWidth()) {
-            Text("Volver")
+            Text(stringResource(R.string.volver))
         }
     }
 
     if (confirmDelete) {
         AlertDialog(
             onDismissRequest = { confirmDelete = false },
-            title = { Text("¿Borrar este lugar?") },
-            text = { Text("Esta acción no se puede deshacer.") },
+            title = { Text(stringResource(R.string.borrar_este_lugar)) },
+            text = { Text(stringResource(R.string.esta_acci_n_no_se_puede_deshacer)) },
             confirmButton = {
                 TextButton(onClick = {
                     confirmDelete = false
                     viewModel.deletePlace(placeId)
                     onBack()
-                }) { Text("Borrar") }
+                }) { Text(stringResource(R.string.borrar)) }
             },
             dismissButton = {
-                TextButton(onClick = { confirmDelete = false }) { Text("Cancelar") }
+                TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.cancelar)) }
             }
         )
     }

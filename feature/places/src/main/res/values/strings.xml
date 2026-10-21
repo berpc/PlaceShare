@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="places_add_title">Agregar lugar</string>
+    <string name="places_title_label">Título</string>
+    <string name="places_note_label">Nota (opcional)</string>
+    <string name="places_save">Guardar</string>
+    <string name="places_location_format">Ubicación: %1$s</string>
+    <string name="places_public_on">Público (otros pueden verlo)</string>
+    <string name="places_public_off">Privado (solo vos)</string>
+    <string name="places_photo_pick">Elegir foto</string>
+    <string name="places_photo_change">Cambiar foto</string>
+    <string name="places_photo_selected">Foto seleccionada</string>
+    <string name="agregar_lugar">Agregar lugar</string>
+    <string name="ubicacion">Ubicacion: %1$s</string>
+    <string name="elegir_foto">Elegir foto</string>
+    <string name="foto_seleccionada">Foto seleccionada</string>
+    <string name="cambiar_foto">Cambiar foto</string>
+    <string name="t_tulo">Título</string>
+    <string name="nota_opcional">Nota (opcional)</string>
+    <string name="hacer_p_blico_este_lugar">Hacer público este lugar</string>
+    <string name="guardar">Guardar</string>
+    <string name="tomar_foto">Tomar foto</string>
+</resources>
