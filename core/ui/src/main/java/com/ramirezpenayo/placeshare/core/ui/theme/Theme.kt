@@ -9,25 +9,43 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import com.ramirezpenayo.placeshare.core.ui.theme.DarkPrimary
-import com.ramirezpenayo.placeshare.core.ui.theme.WhitePrimary
 
 private val DarkColorScheme = darkColorScheme(
-    primary = DarkPrimary,
-    secondary = DarkLight,
-    tertiary = BluePrimary,
-    onSurfaceVariant = WhitePrimary,
+    primary = BluePrimary,
     onPrimary = WhitePrimary,
-    onSecondary = DarkPrimary
+    primaryContainer = BlueDarkContainer,
+    onPrimaryContainer = BlueLightContainer,
+    secondary = BluePrimary,
+    onSecondary = WhitePrimary,
+    tertiary = BluePrimary,
+    background = DarkBackground,
+    onBackground = DarkOnSurface,
+    surface = DarkSurface,
+    onSurface = DarkOnSurface,
+    surfaceVariant = DarkSurfaceVariant,
+    onSurfaceVariant = DarkOnSurfaceMuted,
+    outline = DarkSurfaceVariant,
+    error = ErrorRed,
+    onError = WhitePrimary
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = WhitePrimary,
-    secondary = WhiteLight,
-    tertiary = BluePrimary,
-    onSurfaceVariant = DarkPrimary,
+    primary = BluePrimary,
     onPrimary = WhitePrimary,
-    onSecondary = DarkPrimary
+    primaryContainer = BlueLightContainer,
+    onPrimaryContainer = BlueDarkContainer,
+    secondary = BluePrimary,
+    onSecondary = WhitePrimary,
+    tertiary = BluePrimary,
+    background = LightBackground,
+    onBackground = LightOnSurface,
+    surface = LightSurface,
+    onSurface = LightOnSurface,
+    surfaceVariant = LightSurfaceVariant,
+    onSurfaceVariant = LightOnSurfaceMuted,
+    outline = LightSurfaceVariant,
+    error = ErrorRed,
+    onError = WhitePrimary
 )
 
 @Composable

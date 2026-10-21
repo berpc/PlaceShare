@@ -10,14 +10,12 @@ import com.google.android.gms.common.api.ApiException
 import com.ramirezpenayo.placeshare.core.domain.model.DomainError
 import com.ramirezpenayo.placeshare.core.domain.model.repository.AuthRepository
 import com.ramirezpenayo.placeshare.feature.auth.AuthUiState
-
 import com.ramirezpenayo.placeshare.feature.auth.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -29,7 +27,6 @@ class AuthViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Initial)
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
-    //
     fun getGoogleSignInIntent(): Intent {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(context.getString(R.string.default_web_client_id))
@@ -71,27 +68,32 @@ class AuthViewModel @Inject constructor(
         android.util.Log.d("AuthViewModel", "handleFirebaseAuth called with idToken")
         _uiState.value = AuthUiState.Loading
 
-        authRepository.signInWithGoogle(idToken)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    val user = task.result?.user
-                    android.util.Log.d("AuthViewModel", "Firebase signInWithCredential successful, user: ${user?.uid}")
-                    if (user != null) {
-                        _uiState.value = AuthUiState.Success(user)
+        viewModelScope.launch {
+            val result = authRepository.signInWithGoogle(idToken)
+
+            result.fold(
+                onSuccess = {
+                    val firebaseUser = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
+
+                    if (firebaseUser != null) {
+                        android.util.Log.d("AuthViewModel", "Firebase signIn successful, user: ${firebaseUser.uid}")
+                        _uiState.value = AuthUiState.Success(firebaseUser)
                     } else {
-                        showAuthError(task.exception?.localizedMessage)
+                        showAuthError("No se pudo obtener el usuario de Firebase")
                     }
-                } else {
-                    android.util.Log.e("AuthViewModel", "Firebase signInWithCredential failed: ${task.exception?.message}", task.exception)
-                    showAuthError(task.exception?.localizedMessage)
+                },
+                onFailure = { exception ->
+                    android.util.Log.e("AuthViewModel", "Firebase signIn failed: ${exception.message}", exception)
+                    showAuthError(exception.localizedMessage)
                 }
-            }
+            )
+        }
     }
 
     fun checkAuth() {
-        val user = authRepository.getCurrentUser()
-        if (user != null) {
-            _uiState.value = AuthUiState.Success(user)
+        val firebaseUser = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
+        if (firebaseUser != null) {
+            _uiState.value = AuthUiState.Success(firebaseUser)
         }
     }
 

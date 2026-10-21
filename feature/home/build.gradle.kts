@@ -23,6 +23,11 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:domain"))
+    implementation(project(":core:ui"))
+    implementation(project(":feature:profile"))
+    implementation(project(":feature:places"))
+
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
@@ -39,11 +44,11 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore")
 
     implementation("io.coil-kt:coil-compose:2.7.0")
+
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
     implementation(libs.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
-
 }

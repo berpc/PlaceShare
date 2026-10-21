@@ -10,6 +10,10 @@ val localProps = Properties().apply {
         localPropertiesFile.inputStream().use { load(it) }
     }
 }
+
+val cloudNameVal = localProps.getProperty("cloudinary.cloudName", localProps.getProperty("CLOUDINARY_CLOUD_NAME", ""))
+val uploadPresetVal = localProps.getProperty("cloudinary.uploadPreset", localProps.getProperty("CLOUDINARY_UPLOAD_PRESET", ""))
+
 android {
     namespace = "com.ramirezpenayo.placeshare.core.network"
     compileSdk = 37
@@ -19,9 +23,12 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "cloudName", "\"${localProps.getProperty("cloudinary.cloudName", "")}\"")
-        buildConfigField("String", "uploadPreset", "\"${localProps.getProperty("cloudinary.uploadPreset", "")}\"")
-        }
+        buildConfigField("String", "cloudName", "\"$cloudNameVal\"")
+        buildConfigField("String", "uploadPreset", "\"$uploadPresetVal\"")
+        buildConfigField("String", "CLOUDINARY_CLOUD_NAME", "\"$cloudNameVal\"")
+        buildConfigField("String", "CLOUDINARY_UPLOAD_PRESET", "\"$uploadPresetVal\"")
+    }
+
     buildFeatures {
         buildConfig = true
     }
@@ -35,7 +42,4 @@ android {
 dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.1")
-
-
 }
-

@@ -41,17 +41,12 @@ android {
 
 dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.9.0"))
-    implementation(project(":feature:places"))
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.android.gms:play-services-auth:21.3.0")
 
-
-    implementation("androidx.navigation:navigation-compose:2.8.0")
-    implementation("androidx.compose.material:material-icons-extended")
-
-    implementation("androidx.navigation:navigation-compose:2.8.0")
-    implementation("androidx.compose.material:material-icons-extended")
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.compose.material.icons.extended)
 
     implementation("com.google.dagger:hilt-android:2.60.1")
     ksp("com.google.dagger:hilt-compiler:2.60.1")
@@ -61,9 +56,9 @@ dependencies {
     implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 
-
     implementation(project(":feature:auth"))
     implementation(project(":feature:home"))
+    implementation(project(":feature:places"))
     implementation(project(":core:ui"))
     implementation(project(":core:data"))
     implementation(project(":core:domain"))
