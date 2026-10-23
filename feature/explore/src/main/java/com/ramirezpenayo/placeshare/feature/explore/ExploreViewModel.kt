@@ -46,16 +46,31 @@ class ExploreViewModel : ViewModel() {
     fun isLiked(place: ExplorePlace): Boolean =
         currentUid?.let { place.likedBy.contains(it) } ?: false
 
+
     fun toggleLike(place: ExplorePlace) {
         val uid = currentUid
         if (uid == null) {
             _error.value = "No hay sesión iniciada. Cerrá sesión y volvé a entrar."
             return
         }
-        val change = if (isLiked(place)) FieldValue.arrayRemove(uid) else FieldValue.arrayUnion(uid)
+
+        val liking = !isLiked(place)
+
+        // Actualiza la lista al instante, sin esperar a Firestore.
+        _places.value = _places.value.map { p ->
+            if (p.id == place.id) {
+                p.copy(likedBy = if (liking) p.likedBy + uid else p.likedBy - uid)
+            } else p
+        }
+
+        val change = if (liking) FieldValue.arrayUnion(uid) else FieldValue.arrayRemove(uid)
         db.collection("places").document(place.id).update("likedBy", change)
             .addOnSuccessListener { _error.value = null }
             .addOnFailureListener { e ->
+                // Si Firestore rechaz volvemos
+                _places.value = _places.value.map { p ->
+                    if (p.id == place.id) place else p
+                }
                 _error.value = "No se pudo dar me gusta: ${e.message}"
             }
     }
