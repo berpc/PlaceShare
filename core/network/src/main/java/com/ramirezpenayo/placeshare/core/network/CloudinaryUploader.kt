@@ -14,7 +14,7 @@ package com.ramirezpenayo.placeshare.core.network
         private val cloudName: String = CloudinaryConfig.cloudName,
         private val uploadPreset: String = CloudinaryConfig.uploadPreset
     ) {
-        /** Sube una imagen JPEG y devuelve la URL segura para guardarla en Firestore. */
+        /** Sube una imagen  y devuelve la URLpara guardarla en Firestore. */
         suspend fun subirImagen(jpegBytes: ByteArray): String = withContext(Dispatchers.IO) {
             val body = MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
