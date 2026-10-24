@@ -1,4 +1,4 @@
-package com.ramirezpenayo.placeshare.core.domain.model.repository
+package com.ramirezpenayo.placeshare.core.domain.repository
 
 import com.ramirezpenayo.placeshare.core.domain.model.User
 import kotlinx.coroutines.flow.Flow

@@ -2,17 +2,23 @@ package com.ramirezpenayo.placeshare.feature.home
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ListenerRegistration
-import com.google.firebase.firestore.Query
+import com.ramirezpenayo.placeshare.core.domain.model.Place
+import com.ramirezpenayo.placeshare.core.domain.repository.PlaceRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class HomeViewModel : ViewModel() {
+@HiltViewModel
+class HomeViewModel @Inject constructor(
+    private val placeRepository: PlaceRepository,
+    private val auth: FirebaseAuth
+) : ViewModel() {
 
-    private val db = FirebaseFirestore.getInstance()
-    private val uid = FirebaseAuth.getInstance().currentUser?.uid
+    private val uid = auth.currentUser?.uid
 
     private val _places = MutableStateFlow<List<Place>>(emptyList())
     val places: StateFlow<List<Place>> = _places
@@ -20,34 +26,29 @@ class HomeViewModel : ViewModel() {
     private val _loading = MutableStateFlow(true)
     val loading: StateFlow<Boolean> = _loading
 
-    private var registration: ListenerRegistration? = null
-
     init {
-        if (uid == null) {
+        if (uid.isNullOrBlank()) {
             _loading.value = false
         } else {
-            registration = db.collection("places")
-                .whereEqualTo("userId", uid)
-                .orderBy("createdAt", Query.Direction.DESCENDING)
-                .addSnapshotListener { snapshot, error ->
-                    _loading.value = false
-                    if (error != null) {
-                        Log.e("HomeViewModel", "Error al leer places", error)
-                        return@addSnapshotListener
-                    }
-                    Log.d("HomeViewModel", "Documentos recibidos: ${snapshot?.size()}")
-                    _places.value = snapshot?.documents?.mapNotNull { doc ->
-                        doc.toObject(Place::class.java)?.copy(id = doc.id)
-                    } ?: emptyList()
-                }
+            observeUserPlaces(uid)
+        }
+    }
+
+    private fun observeUserPlaces(userId: String) {
+        viewModelScope.launch {
+            placeRepository.getPlacesForUser(userId).collect { fetchedPlaces ->
+                _loading.value = false
+                _places.value = fetchedPlaces
+            }
         }
     }
 
     fun deletePlace(placeId: String) {
-        db.collection("places").document(placeId).delete()
-    }
-
-    override fun onCleared() {
-        registration?.remove()
+        viewModelScope.launch {
+            placeRepository.deletePlace(placeId)
+                .onFailure { e ->
+                    Log.e("HomeViewModel", "Error al borrar el lugar", e)
+                }
+        }
     }
 }

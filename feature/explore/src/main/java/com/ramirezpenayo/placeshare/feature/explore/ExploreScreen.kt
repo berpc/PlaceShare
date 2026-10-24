@@ -33,11 +33,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.ramirezpenayo.placeshare.core.domain.model.ExplorePlace
 
 @Composable
-fun ExploreScreen(viewModel: ExploreViewModel = viewModel()) {
+fun ExploreScreen(
+    viewModel: ExploreViewModel = hiltViewModel()
+) {
     val places by viewModel.places.collectAsState()
     val loading by viewModel.loading.collectAsState()
     val error by viewModel.error.collectAsState()

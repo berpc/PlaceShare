@@ -36,12 +36,13 @@ import com.ramirezpenayo.placeshare.feature.places.R
 import android.widget.Toast
 import android.net.Uri
 import androidx.core.content.FileProvider
+import androidx.hilt.navigation.compose.hiltViewModel
 import java.io.File
 
 @Composable
 fun AddPlaceScreen(
     onSaved: () -> Unit,
-    viewModel: AddPlaceViewModel = viewModel()
+    viewModel: AddPlaceViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     var title by remember { mutableStateOf("") }

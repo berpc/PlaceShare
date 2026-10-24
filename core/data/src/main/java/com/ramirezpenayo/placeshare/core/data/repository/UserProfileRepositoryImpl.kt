@@ -7,7 +7,7 @@ import com.google.firebase.firestore.SetOptions
 import com.ramirezpenayo.placeshare.core.data.mapper.toFirestoreMap
 import com.ramirezpenayo.placeshare.core.data.mapper.toUser
 import com.ramirezpenayo.placeshare.core.domain.model.User
-import com.ramirezpenayo.placeshare.core.domain.model.repository.UserRepository
+import com.ramirezpenayo.placeshare.core.domain.repository.UserRepository
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow

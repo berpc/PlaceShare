@@ -24,12 +24,13 @@ import androidx.compose.ui.layout.ContentScale
 import coil.compose.AsyncImage
 import androidx.compose.foundation.layout.height
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun PlaceDetailScreen(
     placeId: String,
     onBack: () -> Unit,
-    viewModel: HomeViewModel = viewModel()
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
     val places by viewModel.places.collectAsState()
     val place = places.find { it.id == placeId }
@@ -40,7 +41,7 @@ fun PlaceDetailScreen(
         Column(modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)) {
-            Text("Lugar no concentrate", style = MaterialTheme.typography.bodyLarge)
+            Text("Lugar no encontrado", style = MaterialTheme.typography.bodyLarge)
             TextButton(onClick = onBack) { Text("Volver") }
         }
         return

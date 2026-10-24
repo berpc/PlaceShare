@@ -2,18 +2,23 @@ package com.ramirezpenayo.placeshare.feature.explore
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ListenerRegistration
-import com.google.firebase.firestore.Query
+import com.ramirezpenayo.placeshare.core.domain.model.ExplorePlace
+import com.ramirezpenayo.placeshare.core.domain.repository.ExploreRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ExploreViewModel : ViewModel() {
+@HiltViewModel
+class ExploreViewModel @Inject constructor(
+    private val exploreRepository: ExploreRepository,
+    private val auth: FirebaseAuth // O un AuthRepository si ya lo tienes modularizado
+) : ViewModel() {
 
-    private val db = FirebaseFirestore.getInstance()
-    val currentUid: String? = FirebaseAuth.getInstance().currentUser?.uid
+    val currentUid: String? get() = auth.currentUser?.uid
 
     private val _places = MutableStateFlow<List<ExplorePlace>>(emptyList())
     val places: StateFlow<List<ExplorePlace>> = _places
@@ -24,28 +29,21 @@ class ExploreViewModel : ViewModel() {
     private val _loading = MutableStateFlow(true)
     val loading: StateFlow<Boolean> = _loading
 
-    private var registration: ListenerRegistration? = null
-
     init {
-        registration = db.collection("places")
-            .whereEqualTo("visibility", "public")
-            .orderBy("createdAt", Query.Direction.DESCENDING)
-            .addSnapshotListener { snapshot, error ->
+        observePublicPlaces()
+    }
+
+    private fun observePublicPlaces() {
+        viewModelScope.launch {
+            exploreRepository.getPublicPlaces(currentUid).collect { fetchedPlaces ->
                 _loading.value = false
-                if (error != null) {
-                    Log.e("ExploreViewModel", "Error al leer lugares públicos", error)
-                    return@addSnapshotListener
-                }
-                _places.value = snapshot?.documents
-                    ?.mapNotNull { doc -> doc.toObject(ExplorePlace::class.java)?.copy(id = doc.id) }
-                    ?.filter { it.userId != currentUid }   // tus lugares van en Inicio
-                    ?: emptyList()
+                _places.value = fetchedPlaces
             }
+        }
     }
 
     fun isLiked(place: ExplorePlace): Boolean =
         currentUid?.let { place.likedBy.contains(it) } ?: false
-
 
     fun toggleLike(place: ExplorePlace) {
         val uid = currentUid
@@ -56,26 +54,25 @@ class ExploreViewModel : ViewModel() {
 
         val liking = !isLiked(place)
 
-        // Actualiza la lista al instante, sin esperar a Firestore.
+        // Optimistic update local
         _places.value = _places.value.map { p ->
             if (p.id == place.id) {
                 p.copy(likedBy = if (liking) p.likedBy + uid else p.likedBy - uid)
             } else p
         }
 
-        val change = if (liking) FieldValue.arrayUnion(uid) else FieldValue.arrayRemove(uid)
-        db.collection("places").document(place.id).update("likedBy", change)
-            .addOnSuccessListener { _error.value = null }
-            .addOnFailureListener { e ->
-                // Si Firestore rechaz volvemos
-                _places.value = _places.value.map { p ->
-                    if (p.id == place.id) place else p
+        viewModelScope.launch {
+            exploreRepository.toggleLike(place.id, uid, liking)
+                .onSuccess {
+                    _error.value = null
                 }
-                _error.value = "No se pudo dar me gusta: ${e.message}"
-            }
-    }
-
-    override fun onCleared() {
-        registration?.remove()
+                .onFailure { e ->
+                    // Rollback si falla Firestore
+                    _places.value = _places.value.map { p ->
+                        if (p.id == place.id) place else p
+                    }
+                    _error.value = "No se pudo dar me gusta: ${e.message}"
+                }
+        }
     }
 }

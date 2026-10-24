@@ -2,6 +2,9 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.library)
+
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt.android)
 }
 
 val localProps = Properties().apply {
@@ -42,4 +45,8 @@ android {
 dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.1")
+
+    implementation("com.google.dagger:hilt-android:2.60.1")
+    ksp("com.google.dagger:hilt-compiler:2.60.1")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 }

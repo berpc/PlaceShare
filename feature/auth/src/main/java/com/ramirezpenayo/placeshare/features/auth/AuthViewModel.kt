@@ -8,9 +8,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.ramirezpenayo.placeshare.core.domain.model.DomainError
-import com.ramirezpenayo.placeshare.core.domain.model.repository.AuthRepository
-import com.ramirezpenayo.placeshare.feature.auth.AuthUiState
-import com.ramirezpenayo.placeshare.feature.auth.R
+import com.ramirezpenayo.placeshare.core.domain.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow

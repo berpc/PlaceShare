@@ -1,20 +1,15 @@
 package com.ramirezpenayo.placeshare.core.domain.model
 
-import java.util.Date
-
 data class Place(
-    val id: String,
-    val userId: String,
-    val imageUrl: String,
-    val category: String,
-    val note: String?,
-
-    val placeName: String,
-    val latitude: Double,
-    val longitude: Double,
-    val date: Date,
-
-    val viewsCount: Int = 0,
-    val likesCount: Int = 0,
-    val likedUserIds: List<String> = emptyList()
+    val id: String = "",
+    val userId: String = "",
+    val userName: String = "",
+    val title: String = "",
+    val note: String = "",
+    val photoUrl: String = "",
+    val lat: Double? = null,
+    val lng: Double? = null,
+    val createdAt: Long = 0L,
+    val visibility: String = "public",
+    val likedBy: List<String> = emptyList()
 )

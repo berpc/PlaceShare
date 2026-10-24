@@ -1,16 +1,16 @@
 -- Merging decision tree log ---
 manifest
-ADDED from D:\Android\Laboartorios\PlaceShare\feature\explore\src\main\AndroidManifest.xml:2:1-4:12
-INJECTED from D:\Android\Laboartorios\PlaceShare\feature\explore\src\main\AndroidManifest.xml:2:1-4:12
+ADDED from C:\Users\usuario01\AndroidStudioProjects\PlaceShare\feature\explore\src\main\AndroidManifest.xml:2:1-4:12
+INJECTED from C:\Users\usuario01\AndroidStudioProjects\PlaceShare\feature\explore\src\main\AndroidManifest.xml:2:1-4:12
 	package
-		INJECTED from D:\Android\Laboartorios\PlaceShare\feature\explore\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\usuario01\AndroidStudioProjects\PlaceShare\feature\explore\src\main\AndroidManifest.xml
 	xmlns:android
-		ADDED from D:\Android\Laboartorios\PlaceShare\feature\explore\src\main\AndroidManifest.xml:2:11-69
+		ADDED from C:\Users\usuario01\AndroidStudioProjects\PlaceShare\feature\explore\src\main\AndroidManifest.xml:2:11-69
 uses-sdk
-INJECTED from D:\Android\Laboartorios\PlaceShare\feature\explore\src\main\AndroidManifest.xml reason: use-sdk injection requested
-INJECTED from D:\Android\Laboartorios\PlaceShare\feature\explore\src\main\AndroidManifest.xml
-INJECTED from D:\Android\Laboartorios\PlaceShare\feature\explore\src\main\AndroidManifest.xml
+INJECTED from C:\Users\usuario01\AndroidStudioProjects\PlaceShare\feature\explore\src\main\AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from C:\Users\usuario01\AndroidStudioProjects\PlaceShare\feature\explore\src\main\AndroidManifest.xml
+INJECTED from C:\Users\usuario01\AndroidStudioProjects\PlaceShare\feature\explore\src\main\AndroidManifest.xml
 	android:targetSdkVersion
-		INJECTED from D:\Android\Laboartorios\PlaceShare\feature\explore\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\usuario01\AndroidStudioProjects\PlaceShare\feature\explore\src\main\AndroidManifest.xml
 	android:minSdkVersion
-		INJECTED from D:\Android\Laboartorios\PlaceShare\feature\explore\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\usuario01\AndroidStudioProjects\PlaceShare\feature\explore\src\main\AndroidManifest.xml

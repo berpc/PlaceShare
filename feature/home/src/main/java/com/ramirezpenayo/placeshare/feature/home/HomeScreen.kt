@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -40,6 +41,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import coil.compose.AsyncImage
+import com.ramirezpenayo.placeshare.core.domain.model.Place
 import com.ramirezpenayo.placeshare.feature.places.AddPlaceScreen
 import com.ramirezpenayo.placeshare.feature.profile.navigation.ProfileNavGraph
 import com.ramirezpenayo.placeshare.feature.explore.ExploreScreen
@@ -138,7 +140,7 @@ private fun VisitsNavHost() {
 fun PlacesListScreen(
     onPlaceClick: (String) -> Unit,
     onAddPlaceClick: () -> Unit,
-    viewModel: HomeViewModel = viewModel()
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
     val places by viewModel.places.collectAsState()
     val loading by viewModel.loading.collectAsState()

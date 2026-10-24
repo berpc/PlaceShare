@@ -2,7 +2,7 @@ package com.ramirezpenayo.placeshare.core.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-import com.ramirezpenayo.placeshare.core.domain.model.repository.AuthRepository
+import com.ramirezpenayo.placeshare.core.domain.repository.AuthRepository
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
