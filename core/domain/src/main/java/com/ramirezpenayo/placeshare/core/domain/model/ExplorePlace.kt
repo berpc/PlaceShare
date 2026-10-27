@@ -1,4 +1,4 @@
-package com.ramirezpenayo.placeshare.feature.explore
+package com.ramirezpenayo.placeshare.core.domain.model
 
 data class ExplorePlace(
     val id: String = "",

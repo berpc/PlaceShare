@@ -11,19 +11,19 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.ramirezpenayo.placeshare.core.network.CloudinaryUploader
+import com.ramirezpenayo.placeshare.core.domain.repository.PlaceRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import java.io.ByteArrayOutputStream
+import javax.inject.Inject
 
-
-class AddPlaceViewModel : ViewModel() {
-
-    private val db = FirebaseFirestore.getInstance()
-    private val uploader = CloudinaryUploader()
+@HiltViewModel
+class AddPlaceViewModel @Inject constructor(
+    private val placeRepository: PlaceRepository,
+    private val auth: FirebaseAuth
+) : ViewModel() {
 
     private val _saving = MutableStateFlow(false)
     val saving: StateFlow<Boolean> = _saving
@@ -43,20 +43,18 @@ class AddPlaceViewModel : ViewModel() {
     @SuppressLint("MissingPermission")
     fun fetchLocation(context: Context) {
         val client = LocationServices.getFusedLocationProviderClient(context)
-        client.getCurrentLocation(
-            Priority.PRIORITY_HIGH_ACCURACY,
-            CancellationTokenSource().token
-        ).addOnSuccessListener { location ->
-            if (location != null) {
-                lat = location.latitude
-                lng = location.longitude
-                _locationText.value = "%.5f, %.5f".format(location.latitude, location.longitude)
-            } else {
+        client.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, CancellationTokenSource().token)
+            .addOnSuccessListener { location ->
+                if (location != null) {
+                    lat = location.latitude
+                    lng = location.longitude
+                    _locationText.value = "%.5f, %.5f".format(location.latitude, location.longitude)
+                } else {
+                    _locationText.value = "No se pudo obtener la ubicación"
+                }
+            }.addOnFailureListener {
                 _locationText.value = "No se pudo obtener la ubicación"
             }
-        }.addOnFailureListener {
-            _locationText.value = "No se pudo obtener la ubicación"
-        }
     }
 
     fun setLocationDenied() {
@@ -68,9 +66,11 @@ class AddPlaceViewModel : ViewModel() {
     }
 
     fun savePlace(context: Context, title: String, note: String, isPublic: Boolean, onSaved: () -> Unit) {
-        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        val currentUser = auth.currentUser
+        val uid = currentUser?.uid
+        val userName = currentUser?.displayName ?: "Usuario"
 
-        if (uid == null) {
+        if (uid.isNullOrBlank()) {
             _error.value = "Tenés que iniciar sesión para guardar."
             return
         }
@@ -83,31 +83,34 @@ class AddPlaceViewModel : ViewModel() {
         _error.value = null
 
         viewModelScope.launch {
-            try {
-                val photoUrl = _photoUri.value?.let { uri ->
-                    val bytes = uriToJpegBytes(context, uri)
-                    uploader.subirImagen(bytes)
+            val imageBytes = _photoUri.value?.let { uri ->
+                try {
+                    uriToJpegBytes(context, uri)
+                } catch (e: Exception) {
+                    null
                 }
-
-                val data = hashMapOf<String, Any>(
-                    "userId" to uid,"userName" to (FirebaseAuth.getInstance().currentUser?.displayName ?: "Usuario"),
-                    "title" to title.trim(),
-                    "note" to note.trim(),
-                    "createdAt" to System.currentTimeMillis(),
-                    "visibility" to if (isPublic) "public" else "private"
-                )
-                lat?.let { data["lat"] = it }
-                lng?.let { data["lng"] = it }
-                photoUrl?.let { data["photoUrl"] = it }
-
-                db.collection("places").add(data).await()
-                _saving.value = false
-                _photoUri.value = null
-                onSaved()
-            } catch (e: Exception) {
-                _saving.value = false
-                _error.value = "No se pudo guardar: ${e.message}"
             }
+
+            placeRepository.savePlace(
+                userId = uid,
+                userName = userName,
+                title = title.trim(),
+                note = note.trim(),
+                isPublic = isPublic,
+                lat = lat,
+                lng = lng,
+                imageBytes = imageBytes
+            ).fold(
+                onSuccess = {
+                    _saving.value = false
+                    _photoUri.value = null
+                    onSaved()
+                },
+                onFailure = { e ->
+                    _saving.value = false
+                    _error.value = "No se pudo guardar: ${e.message}"
+                }
+            )
         }
     }
 

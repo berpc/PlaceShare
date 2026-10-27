@@ -3,8 +3,8 @@ package com.ramirezpenayo.placeshare.feature.profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ramirezpenayo.placeshare.core.domain.model.DomainError
-import com.ramirezpenayo.placeshare.core.domain.model.repository.AuthRepository
-import com.ramirezpenayo.placeshare.core.domain.model.repository.UserRepository
+import com.ramirezpenayo.placeshare.core.domain.repository.AuthRepository
+import com.ramirezpenayo.placeshare.core.domain.repository.UserRepository
 import com.ramirezpenayo.placeshare.feature.profile.presentation.components.AppThemeMode
 import com.ramirezpenayo.placeshare.feature.profile.presentation.profile.ProfileUiState
 import dagger.hilt.android.lifecycle.HiltViewModel

@@ -1,4 +1,4 @@
-package com.ramirezpenayo.placeshare.core.domain.model.repository
+package com.ramirezpenayo.placeshare.core.domain.repository
 
 interface AuthRepository {
     suspend fun signInWithGoogle(idToken: String): Result<Unit>

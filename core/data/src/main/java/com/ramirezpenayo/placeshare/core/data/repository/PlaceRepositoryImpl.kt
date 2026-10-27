@@ -1,0 +1,88 @@
+package com.ramirezpenayo.placeshare.core.data.repository
+
+import android.util.Log
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+import com.ramirezpenayo.placeshare.core.data.mapper.toFirestoreMap
+import com.ramirezpenayo.placeshare.core.data.mapper.toPlace
+import com.ramirezpenayo.placeshare.core.network.CloudinaryUploader
+import com.ramirezpenayo.placeshare.core.domain.model.Place
+import com.ramirezpenayo.placeshare.core.domain.repository.PlaceRepository
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
+
+class PlaceRepositoryImpl @Inject constructor(
+    private val firestore: FirebaseFirestore,
+    private val uploader: CloudinaryUploader
+) : PlaceRepository {
+
+    override fun getPlacesForUser(userId: String): Flow<List<Place>> = callbackFlow {
+        Log.d("PlaceRepo", "Iniciando escucha para userId: $userId") // 👈 Log de control
+
+        val listener = firestore.collection("places")
+            .whereEqualTo("userId", userId)
+            .orderBy("createdAt", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    Log.e("PlaceRepo", "Error en snapshot listener: ${error.message}", error) // 👈 ¡Muestra el error real!
+                    trySend(emptyList())
+                    return@addSnapshotListener
+                }
+
+                val docs = snapshot?.documents ?: emptyList()
+                Log.d("PlaceRepo", "Documentos recibidos de Firestore: ${docs.size}") // 👈 Cuántos llegan
+
+                val places = docs.map { it.toPlace() }
+                trySend(places)
+            }
+
+        awaitClose {
+            Log.d("PlaceRepo", "Cerrando listener de places")
+            listener.remove()
+        }
+    }
+
+    override suspend fun deletePlace(placeId: String): Result<Unit> {
+        return try {
+            firestore.collection("places").document(placeId).delete().await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun savePlace(
+        userId: String,
+        userName: String,
+        title: String,
+        note: String,
+        isPublic: Boolean,
+        lat: Double?,
+        lng: Double?,
+        imageBytes: ByteArray?
+    ): Result<Unit> {
+        return try {
+            val photoUrl = imageBytes?.let { uploader.subirImagen(it) } ?: ""
+
+            val place = Place(
+                userId = userId,
+                userName = userName,
+                title = title.trim(),
+                note = note.trim(),
+                photoUrl = photoUrl,
+                lat = lat,
+                lng = lng,
+                createdAt = System.currentTimeMillis(),
+                visibility = if (isPublic) "public" else "private"
+            )
+
+            firestore.collection("places").add(place.toFirestoreMap()).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+}
