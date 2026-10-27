@@ -8,10 +8,10 @@ import com.ramirezpenayo.placeshare.core.data.mapper.toFirestoreMap
 import com.ramirezpenayo.placeshare.core.data.mapper.toUser
 import com.ramirezpenayo.placeshare.core.domain.model.User
 import com.ramirezpenayo.placeshare.core.domain.repository.UserRepository
-import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class UserRepositoryImpl @Inject constructor(
@@ -55,15 +55,13 @@ class UserRepositoryImpl @Inject constructor(
             val document = firestore.collection("users").document(uid).get().await()
 
             if (document.exists()) {
-                // Si ya existe, lo leemos
                 val userData = document.data ?: emptyMap()
                 Result.success(userData.toUser(uid))
             } else {
-                // Si NO existe (es su primer login), creamos un usuario nuevo por defecto
                 val newUser = User(
                     uid = uid,
                     name = name,
-                    username = email?.substringBefore("@") ?: "user_${uid.take(5)}", // Username temporal basado en su email
+                    username = email?.substringBefore("@") ?: "user_${uid.take(5)}",
                     bio = "¡Hola! Estoy usando PlaceShare.",
                     email = email,
                     photoUrl = photoUrl,
@@ -74,10 +72,7 @@ class UserRepositoryImpl @Inject constructor(
                     totalFollowing = 0
                 )
 
-                // Lo guardamos en Firestore
                 firestore.collection("users").document(uid).set(newUser.toFirestoreMap()).await()
-
-                // Y lo retornamos
                 Result.success(newUser)
             }
         } catch (e: Exception) {
@@ -89,7 +84,7 @@ class UserRepositoryImpl @Inject constructor(
         return try {
             firestore.collection("users")
                 .document(user.uid)
-                .set(user.toFirestoreMap()) // O update() si prefieres actualizar solo campos específicos
+                .set(user.toFirestoreMap())
                 .await()
             Result.success(Unit)
         } catch (e: Exception) {
@@ -110,16 +105,33 @@ class UserRepositoryImpl @Inject constructor(
     }
 
     override fun getCurrentUserFlow(): Flow<User?> = callbackFlow {
-        var documentListener: ListenerRegistration? = null
+        var userListener: ListenerRegistration? = null
+        var placesListener: ListenerRegistration? = null
 
         val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
             val uid = firebaseAuth.currentUser?.uid
-            documentListener?.remove()
+            userListener?.remove()
+            placesListener?.remove()
 
             if (uid == null) {
                 trySend(null)
             } else {
-                documentListener = firestore.collection("users").document(uid)
+                var currentUser: User? = null
+                var calculatedPlacesCount = 0
+                var calculatedLikesCount = 0
+
+                fun emitUser() {
+                    currentUser?.let { user ->
+                        trySend(
+                            user.copy(
+                                totalPlacesCount = calculatedPlacesCount,
+                                totalLikesReceived = calculatedLikesCount
+                            )
+                        )
+                    }
+                }
+
+                userListener = firestore.collection("users").document(uid)
                     .addSnapshotListener { snapshot, error ->
                         if (error != null) {
                             trySend(null)
@@ -128,10 +140,24 @@ class UserRepositoryImpl @Inject constructor(
 
                         if (snapshot != null && snapshot.exists()) {
                             val userData = snapshot.data ?: emptyMap()
-                            val user = userData.toUser(uid)
-                            trySend(user)
+                            currentUser = userData.toUser(uid)
+                            emitUser()
                         } else {
                             trySend(null)
+                        }
+                    }
+
+                placesListener = firestore.collection("places")
+                    .whereEqualTo("userId", uid)
+                    .addSnapshotListener { snapshot, error ->
+                        if (error == null && snapshot != null) {
+                            val docs = snapshot.documents
+                            calculatedPlacesCount = docs.size
+                            calculatedLikesCount = docs.sumOf { doc ->
+                                val likedBy = doc.get("likedBy") as? List<*>
+                                likedBy?.size ?: 0
+                            }
+                            emitUser()
                         }
                     }
             }
@@ -140,7 +166,8 @@ class UserRepositoryImpl @Inject constructor(
         auth.addAuthStateListener(authStateListener)
 
         awaitClose {
-            documentListener?.remove()
+            userListener?.remove()
+            placesListener?.remove()
             auth.removeAuthStateListener(authStateListener)
         }
     }

@@ -1,12 +1,13 @@
 package com.ramirezpenayo.placeshare.core.data.repository
 
 import android.util.Log
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.ramirezpenayo.placeshare.core.data.mapper.toFirestoreMap
 import com.ramirezpenayo.placeshare.core.data.mapper.toPlace
-import com.ramirezpenayo.placeshare.core.network.CloudinaryUploader
 import com.ramirezpenayo.placeshare.core.domain.model.Place
 import com.ramirezpenayo.placeshare.core.domain.repository.PlaceRepository
+import com.ramirezpenayo.placeshare.core.network.CloudinaryUploader
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -45,7 +46,17 @@ class PlaceRepositoryImpl @Inject constructor(
 
     override suspend fun deletePlace(placeId: String): Result<Unit> {
         return try {
+            val placeDoc = firestore.collection("places").document(placeId).get().await()
+            val userId = placeDoc.getString("userId")
+
             firestore.collection("places").document(placeId).delete().await()
+
+            if (!userId.isNullOrBlank()) {
+                firestore.collection("users").document(userId)
+                    .update("totalPlacesCount", FieldValue.increment(-1))
+                    .await()
+            }
+
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -77,7 +88,14 @@ class PlaceRepositoryImpl @Inject constructor(
                 visibility = if (isPublic) "public" else "private"
             )
 
-            firestore.collection("places").add(place.toFirestoreMap()).await()
+            val placeRef = firestore.collection("places").document()
+            val userRef = firestore.collection("users").document(userId)
+
+            firestore.runTransaction { transaction ->
+                transaction.set(placeRef, place.toFirestoreMap())
+                transaction.update(userRef, "totalPlacesCount", FieldValue.increment(1))
+            }.await()
+
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

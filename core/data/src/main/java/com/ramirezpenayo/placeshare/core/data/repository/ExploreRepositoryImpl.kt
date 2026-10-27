@@ -4,6 +4,8 @@ import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+import com.ramirezpenayo.placeshare.core.domain.model.Comment
 import com.ramirezpenayo.placeshare.core.domain.model.ExplorePlace
 import com.ramirezpenayo.placeshare.core.domain.repository.ExploreRepository
 import kotlinx.coroutines.channels.awaitClose
@@ -39,10 +41,70 @@ class ExploreRepositoryImpl @Inject constructor(
 
     override suspend fun toggleLike(placeId: String, userId: String, isLiked: Boolean): Result<Unit> {
         return try {
+            val placeRef = firestore.collection("places").document(placeId)
+            val placeDoc = placeRef.get().await()
+            val ownerId = placeDoc.getString("userId")
+
             val change = if (isLiked) FieldValue.arrayUnion(userId) else FieldValue.arrayRemove(userId)
-            firestore.collection("places").document(placeId)
-                .update("likedBy", change)
-                .await()
+            val likeIncrement = if (isLiked) 1L else -1L
+
+            firestore.runTransaction { transaction ->
+                transaction.update(placeRef, "likedBy", change)
+                if (!ownerId.isNullOrBlank()) {
+                    val ownerRef = firestore.collection("users").document(ownerId)
+                    transaction.update(ownerRef, "totalLikesReceived", FieldValue.increment(likeIncrement))
+                }
+            }.await()
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override fun getComments(placeId: String): Flow<List<Comment>> = callbackFlow {
+        val listener = firestore.collection("places")
+            .document(placeId)
+            .collection("comments")
+            .orderBy("createdAt", Query.Direction.ASCENDING)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    Log.e("ExploreRepo", "Error al obtener comentarios: ${error.message}", error)
+                    trySend(emptyList())
+                    return@addSnapshotListener
+                }
+                val comments = snapshot?.documents
+                    ?.mapNotNull { doc -> doc.toObject(Comment::class.java)?.copy(id = doc.id) }
+                    ?: emptyList()
+
+                trySend(comments)
+            }
+
+        awaitClose { listener.remove() }
+    }
+
+    override suspend fun addComment(
+        placeId: String,
+        userId: String,
+        userName: String,
+        text: String
+    ): Result<Unit> {
+        return try {
+            val placeRef = firestore.collection("places").document(placeId)
+            val commentRef = placeRef.collection("comments").document()
+
+            val commentData = mapOf(
+                "userId" to userId,
+                "userName" to userName,
+                "text" to text,
+                "createdAt" to System.currentTimeMillis()
+            )
+
+            firestore.runTransaction { transaction ->
+                transaction.set(commentRef, commentData)
+                transaction.update(placeRef, "commentsCount", FieldValue.increment(1))
+            }.await()
+
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

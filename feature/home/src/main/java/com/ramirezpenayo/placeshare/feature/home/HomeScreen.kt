@@ -85,8 +85,8 @@ fun HomeScreen(
                 VisitsNavHost()
             }
             composable(HomeTab.Maps.route) {
-                //MapScreen()
-                PantallaTemporal("Mapa")
+                MapScreen()
+               // PantallaTemporal("Mapa")
             }
             composable(HomeTab.Explore.route) {
                 ExploreScreen()
