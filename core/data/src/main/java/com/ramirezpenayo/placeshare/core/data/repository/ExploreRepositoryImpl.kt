@@ -1,9 +1,9 @@
 package com.ramirezpenayo.placeshare.core.data.repository
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 import com.ramirezpenayo.placeshare.core.domain.model.ExplorePlace
 import com.ramirezpenayo.placeshare.core.domain.repository.ExploreRepository
 import kotlinx.coroutines.channels.awaitClose
@@ -20,15 +20,15 @@ class ExploreRepositoryImpl @Inject constructor(
     override fun getPublicPlaces(currentUid: String?): Flow<List<ExplorePlace>> = callbackFlow {
         val listener = firestore.collection("places")
             .whereEqualTo("visibility", "public")
-            .orderBy("createdAt", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
+                    Log.e("ExploreRepo", "Error al obtener lugares públicos: ${error.message}", error)
                     trySend(emptyList())
                     return@addSnapshotListener
                 }
                 val places = snapshot?.documents
                     ?.mapNotNull { doc -> doc.toObject(ExplorePlace::class.java)?.copy(id = doc.id) }
-                    ?.filter { it.userId != currentUid }
+                    ?.sortedByDescending { it.createdAt }
                     ?: emptyList()
 
                 trySend(places)

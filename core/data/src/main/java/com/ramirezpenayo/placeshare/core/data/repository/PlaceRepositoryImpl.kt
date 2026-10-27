@@ -2,7 +2,6 @@ package com.ramirezpenayo.placeshare.core.data.repository
 
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 import com.ramirezpenayo.placeshare.core.data.mapper.toFirestoreMap
 import com.ramirezpenayo.placeshare.core.data.mapper.toPlace
 import com.ramirezpenayo.placeshare.core.network.CloudinaryUploader
@@ -20,22 +19,21 @@ class PlaceRepositoryImpl @Inject constructor(
 ) : PlaceRepository {
 
     override fun getPlacesForUser(userId: String): Flow<List<Place>> = callbackFlow {
-        Log.d("PlaceRepo", "Iniciando escucha para userId: $userId") // 👈 Log de control
+        Log.d("PlaceRepo", "Iniciando escucha para userId: $userId")
 
         val listener = firestore.collection("places")
             .whereEqualTo("userId", userId)
-            .orderBy("createdAt", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    Log.e("PlaceRepo", "Error en snapshot listener: ${error.message}", error) // 👈 ¡Muestra el error real!
+                    Log.e("PlaceRepo", "Error en snapshot listener: ${error.message}", error)
                     trySend(emptyList())
                     return@addSnapshotListener
                 }
 
                 val docs = snapshot?.documents ?: emptyList()
-                Log.d("PlaceRepo", "Documentos recibidos de Firestore: ${docs.size}") // 👈 Cuántos llegan
+                Log.d("PlaceRepo", "Documentos recibidos de Firestore: ${docs.size}")
 
-                val places = docs.map { it.toPlace() }
+                val places = docs.map { it.toPlace() }.sortedByDescending { it.createdAt }
                 trySend(places)
             }
 
