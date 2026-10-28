@@ -5,7 +5,14 @@ import kotlinx.coroutines.flow.Flow
 
 interface PlaceRepository {
     fun getPlacesForUser(userId: String): Flow<List<Place>>
+    fun getPlaceById(placeId: String): Flow<Place?>
     suspend fun deletePlace(placeId: String): Result<Unit>
+    suspend fun updatePlace(
+        placeId: String,
+        title: String,
+        note: String,
+        isPublic: Boolean
+    ): Result<Unit>
     suspend fun savePlace(
         userId: String,
         userName: String,

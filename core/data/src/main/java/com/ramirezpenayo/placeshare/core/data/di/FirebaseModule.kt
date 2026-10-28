@@ -4,10 +4,12 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.ramirezpenayo.placeshare.core.data.repository.AuthRepositoryImpl
 import com.ramirezpenayo.placeshare.core.data.repository.ExploreRepositoryImpl
+import com.ramirezpenayo.placeshare.core.data.repository.NotificationRepositoryImpl
 import com.ramirezpenayo.placeshare.core.data.repository.PlaceRepositoryImpl
 import com.ramirezpenayo.placeshare.core.data.repository.UserRepositoryImpl
 import com.ramirezpenayo.placeshare.core.domain.repository.AuthRepository
 import com.ramirezpenayo.placeshare.core.domain.repository.ExploreRepository
+import com.ramirezpenayo.placeshare.core.domain.repository.NotificationRepository
 import com.ramirezpenayo.placeshare.core.domain.repository.PlaceRepository
 import com.ramirezpenayo.placeshare.core.domain.repository.UserRepository
 import com.ramirezpenayo.placeshare.core.network.CloudinaryUploader
@@ -73,4 +75,10 @@ abstract class RepositoryModule {
     abstract fun bindPlaceRepository(
         impl: PlaceRepositoryImpl
     ): PlaceRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindNotificationRepository(
+        impl: NotificationRepositoryImpl
+    ): NotificationRepository
 }

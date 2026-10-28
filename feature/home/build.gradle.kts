@@ -29,6 +29,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":feature:profile"))
     implementation(project(":feature:places"))
+    implementation(project(":feature:notifications"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)

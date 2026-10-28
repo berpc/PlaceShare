@@ -44,6 +44,41 @@ class PlaceRepositoryImpl @Inject constructor(
         }
     }
 
+    override fun getPlaceById(placeId: String): Flow<Place?> = callbackFlow {
+        val listener = firestore.collection("places")
+            .document(placeId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null || snapshot == null || !snapshot.exists()) {
+                    trySend(null)
+                    return@addSnapshotListener
+                }
+                trySend(snapshot.toPlace())
+            }
+
+        awaitClose { listener.remove() }
+    }
+
+    override suspend fun updatePlace(
+        placeId: String,
+        title: String,
+        note: String,
+        isPublic: Boolean
+    ): Result<Unit> {
+        return try {
+            firestore.collection("places").document(placeId)
+                .update(
+                    mapOf(
+                        "title" to title.trim(),
+                        "note" to note.trim(),
+                        "visibility" to if (isPublic) "public" else "private"
+                    )
+                ).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override suspend fun deletePlace(placeId: String): Result<Unit> {
         return try {
             val placeDoc = firestore.collection("places").document(placeId).get().await()

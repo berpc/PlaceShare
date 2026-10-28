@@ -44,6 +44,8 @@ class ExploreRepositoryImpl @Inject constructor(
             val placeRef = firestore.collection("places").document(placeId)
             val placeDoc = placeRef.get().await()
             val ownerId = placeDoc.getString("userId")
+            val postTitle = placeDoc.getString("title") ?: "Publicación"
+            val postPhotoUrl = placeDoc.getString("photoUrl") ?: ""
 
             val change = if (isLiked) FieldValue.arrayUnion(userId) else FieldValue.arrayRemove(userId)
             val likeIncrement = if (isLiked) 1L else -1L
@@ -55,6 +57,26 @@ class ExploreRepositoryImpl @Inject constructor(
                     transaction.update(ownerRef, "totalLikesReceived", FieldValue.increment(likeIncrement))
                 }
             }.await()
+
+            if (isLiked && !ownerId.isNullOrBlank() && ownerId != userId) {
+                val senderName = auth.currentUser?.displayName?.takeIf { it.isNotBlank() }
+                    ?: auth.currentUser?.email?.substringBefore("@")
+                    ?: "Un usuario"
+
+                val notifData = mapOf(
+                    "recipientUserId" to ownerId,
+                    "senderId" to userId,
+                    "senderName" to senderName,
+                    "type" to "LIKE",
+                    "postId" to placeId,
+                    "postTitle" to postTitle,
+                    "postPhotoUrl" to postPhotoUrl,
+                    "message" to "Le gustó tu publicación",
+                    "createdAt" to System.currentTimeMillis(),
+                    "isRead" to false
+                )
+                firestore.collection("notifications").add(notifData)
+            }
 
             Result.success(Unit)
         } catch (e: Exception) {
@@ -91,6 +113,11 @@ class ExploreRepositoryImpl @Inject constructor(
     ): Result<Unit> {
         return try {
             val placeRef = firestore.collection("places").document(placeId)
+            val placeDoc = placeRef.get().await()
+            val ownerId = placeDoc.getString("userId")
+            val postTitle = placeDoc.getString("title") ?: "Publicación"
+            val postPhotoUrl = placeDoc.getString("photoUrl") ?: ""
+
             val commentRef = placeRef.collection("comments").document()
 
             val commentData = mapOf(
@@ -104,6 +131,22 @@ class ExploreRepositoryImpl @Inject constructor(
                 transaction.set(commentRef, commentData)
                 transaction.update(placeRef, "commentsCount", FieldValue.increment(1))
             }.await()
+
+            if (!ownerId.isNullOrBlank() && ownerId != userId) {
+                val notifData = mapOf(
+                    "recipientUserId" to ownerId,
+                    "senderId" to userId,
+                    "senderName" to userName,
+                    "type" to "COMMENT",
+                    "postId" to placeId,
+                    "postTitle" to postTitle,
+                    "postPhotoUrl" to postPhotoUrl,
+                    "message" to text,
+                    "createdAt" to System.currentTimeMillis(),
+                    "isRead" to false
+                )
+                firestore.collection("notifications").add(notifData)
+            }
 
             Result.success(Unit)
         } catch (e: Exception) {

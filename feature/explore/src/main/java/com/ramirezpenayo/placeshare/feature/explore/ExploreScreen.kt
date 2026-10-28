@@ -241,7 +241,7 @@ private fun CommentsBottomSheet(
             ) {
                 OutlinedTextField(
                     value = commentText,
-                    onValueChange = { commentText = it },
+                    onValueChange = { if (it.length <= 150) commentText = it },
                     placeholder = { Text("Escribe un comentario...") },
                     modifier = Modifier.weight(1f),
                     maxLines = 3,

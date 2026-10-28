@@ -6,6 +6,7 @@ import java.util.Locale
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -14,10 +15,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -45,6 +51,8 @@ import com.ramirezpenayo.placeshare.core.domain.model.Place
 import com.ramirezpenayo.placeshare.feature.places.AddPlaceScreen
 import com.ramirezpenayo.placeshare.feature.profile.navigation.ProfileNavGraph
 import com.ramirezpenayo.placeshare.feature.explore.ExploreScreen
+import com.ramirezpenayo.placeshare.feature.notifications.NotificationsScreen
+import com.ramirezpenayo.placeshare.feature.notifications.NotificationsViewModel
 @Composable
 fun HomeScreen(
     onNavigateToThemeSettings: () -> Unit = {},
@@ -116,7 +124,15 @@ private fun VisitsNavHost() {
                 },
                 onAddPlaceClick = {
                     visitsNavController.navigate("add_place")
+                },
+                onNotificationsClick = {
+                    visitsNavController.navigate("notifications")
                 }
+            )
+        }
+        composable("notifications") {
+            NotificationsScreen(
+                onBackClick = { visitsNavController.popBackStack() }
             )
         }
         composable(
@@ -140,10 +156,13 @@ private fun VisitsNavHost() {
 fun PlacesListScreen(
     onPlaceClick: (String) -> Unit,
     onAddPlaceClick: () -> Unit,
-    viewModel: HomeViewModel = hiltViewModel()
+    onNotificationsClick: () -> Unit = {},
+    viewModel: HomeViewModel = hiltViewModel(),
+    notificationsViewModel: NotificationsViewModel = hiltViewModel()
 ) {
     val places by viewModel.places.collectAsState()
     val loading by viewModel.loading.collectAsState()
+    val unreadCount by notificationsViewModel.unreadCount.collectAsState()
 
     Scaffold(
         floatingActionButton = {
@@ -158,15 +177,42 @@ fun PlacesListScreen(
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
-            Text(
-                text = "Mis lugares",
-                style = MaterialTheme.typography.headlineMedium
-            )
-            Text(
-                text = "${places.size} guardados",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(top = 4.dp, bottom = 16.dp)
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = "Mis lugares",
+                        style = MaterialTheme.typography.headlineMedium
+                    )
+                    Text(
+                        text = "${places.size} guardados",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(top = 4.dp, bottom = 16.dp)
+                    )
+                }
+
+                IconButton(onClick = onNotificationsClick) {
+                    if (unreadCount > 0) {
+                        BadgedBox(
+                            badge = { Badge { Text("$unreadCount") } }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.NotificationsActive,
+                                contentDescription = "Notificaciones",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    } else {
+                        Icon(
+                            imageVector = Icons.Outlined.Notifications,
+                            contentDescription = "Notificaciones"
+                        )
+                    }
+                }
+            }
 
             when {
                 loading -> Box(
