@@ -55,6 +55,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.ramirezpenayo.placeshare.feature.places.R
 import java.io.File
+import androidx.activity.compose.BackHandler
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 
 private const val MAX_TITLE_LENGTH = 50
 private const val MAX_NOTE_LENGTH = 200
@@ -62,6 +65,7 @@ private const val MAX_NOTE_LENGTH = 200
 @Composable
 fun AddPlaceScreen(
     onSaved: () -> Unit,
+    onBackClick: () -> Unit = {}, // callback 
     viewModel: AddPlaceViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -73,6 +77,7 @@ fun AddPlaceScreen(
     val error by viewModel.error.collectAsState()
     val locationText by viewModel.locationText.collectAsState()
     val photoUri by viewModel.photoUri.collectAsState()
+    
 
     val pickPhoto = rememberLauncherForActivityResult(
         ActivityResultContracts.PickVisualMedia()
@@ -135,6 +140,14 @@ fun AddPlaceScreen(
             viewModel.setLocationDenied()
         }
     }
+    // Determinar si el usuario realizó algún cambio
+    val hasChanges = title.isNotBlank() || note.isNotBlank() || photoUri != null
+    var showDiscardDialog by remember { mutableStateOf(false) }
+    
+    BackHandler(enabled = hasChanges) {
+        showDiscardDialog = true
+    }
+
 
     LaunchedEffect(Unit) {
         val granted = ContextCompat.checkSelfPermission(
@@ -150,6 +163,28 @@ fun AddPlaceScreen(
                 )
             )
         }
+    }
+    if (showDiscardDialog) {
+        AlertDialog(
+            onDismissRequest = { showDiscardDialog = false },
+            title = { Text("¿Descartar cambios?") },
+            text = { Text("Tienes datos ingresados sin guardar. ¿Deseas salir y descartar las modificaciones?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDiscardDialog = false
+                        onBackClick()
+                    }
+                ) {
+                    Text("Descartar", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDiscardDialog = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
     }
 
     Column(

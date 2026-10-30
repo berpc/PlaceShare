@@ -146,7 +146,8 @@ private fun VisitsNavHost() {
         }
         composable("add_place") {
             AddPlaceScreen(
-                onSaved = { visitsNavController.popBackStack() }
+                onSaved = { visitsNavController.popBackStack() },
+                onBackClick = { visitsNavController.popBackStack() }
             )
         }
     }
