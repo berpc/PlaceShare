@@ -26,8 +26,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.ramirezpenayo.placeshare.feature.home.component.formatDate
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Marker
 
 @Composable
 fun PlaceDetailScreen(
@@ -40,7 +46,6 @@ fun PlaceDetailScreen(
     var confirmDelete by remember { mutableStateOf(false) }
 
     if (place == null) {
-        // Puede pasar un instante mientras carga, o si el lugar fue borrado.
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -59,7 +64,6 @@ fun PlaceDetailScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // 1. Imagen ampliada
         if (place.photoUrl.isNotBlank()) {
             AsyncImage(
                 model = place.photoUrl,
@@ -72,20 +76,17 @@ fun PlaceDetailScreen(
             )
         }
 
-        // 2. Título
         Text(
             text = place.title,
             style = MaterialTheme.typography.headlineMedium
         )
 
-        // 3. Fecha
         Text(
             text = formatDate(place.createdAt),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        // 4. Nota / Descripción
         if (place.note.isNotBlank()) {
             Text(
                 text = place.note,
@@ -93,7 +94,6 @@ fun PlaceDetailScreen(
             )
         }
 
-        // 5. Ubicación en el mapa
         val lat = place.lat
         val lng = place.lng
         if (lat != null && lng != null) {
@@ -103,25 +103,25 @@ fun PlaceDetailScreen(
                 style = MaterialTheme.typography.titleMedium
             )
 
-            androidx.compose.ui.viewinterop.AndroidView(
+            AndroidView(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(220.dp)
                     .clip(MaterialTheme.shapes.medium),
                 factory = { ctx ->
-                    org.osmdroid.views.MapView(ctx).apply {
-                        setTileSource(org.osmdroid.tileprovider.tilesource.TileSourceFactory.MAPNIK)
+                    MapView(ctx).apply {
+                        setTileSource(TileSourceFactory.MAPNIK)
                         setMultiTouchControls(true)
-                        val point = org.osmdroid.util.GeoPoint(lat, lng)
+                        val point = GeoPoint(lat, lng)
                         controller.setZoom(15.0)
                         controller.setCenter(point)
 
-                        val marker = org.osmdroid.views.overlay.Marker(this).apply {
+                        val marker = Marker(this).apply {
                             position = point
                             title = place.title
                             setAnchor(
-                                org.osmdroid.views.overlay.Marker.ANCHOR_CENTER,
-                                org.osmdroid.views.overlay.Marker.ANCHOR_BOTTOM
+                                Marker.ANCHOR_CENTER,
+                                Marker.ANCHOR_BOTTOM
                             )
                         }
                         overlays.add(marker)
@@ -132,7 +132,6 @@ fun PlaceDetailScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // 6. Botones de acción
         Button(
             onClick = { confirmDelete = true },
             colors = ButtonDefaults.buttonColors(
@@ -157,14 +156,23 @@ fun PlaceDetailScreen(
             title = { Text(stringResource(R.string.borrar_este_lugar)) },
             text = { Text(stringResource(R.string.esta_acci_n_no_se_puede_deshacer)) },
             confirmButton = {
-                TextButton(onClick = {
-                    confirmDelete = false
-                    viewModel.deletePlace(placeId)
-                    onBack()
-                }) { Text(stringResource(R.string.borrar)) }
+                TextButton(
+                    onClick = {
+                        confirmDelete = false
+                        viewModel.deletePlace(placeId)
+                        onBack()
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text(stringResource(R.string.borrar))
+                }
             },
             dismissButton = {
-                TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.cancelar)) }
+                TextButton(onClick = { confirmDelete = false }) {
+                    Text(stringResource(R.string.cancelar))
+                }
             }
         )
     }

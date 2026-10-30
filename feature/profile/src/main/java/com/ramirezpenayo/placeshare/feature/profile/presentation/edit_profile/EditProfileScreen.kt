@@ -6,7 +6,9 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Check
@@ -17,12 +19,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.ramirezpenayo.placeshare.core.ui.components.LoadingContent
 import com.ramirezpenayo.placeshare.core.ui.components.PlaceShareTopBar
 import com.ramirezpenayo.placeshare.core.ui.components.asMessage
+
+private const val MAX_NAME_LENGTH = 50
+private const val MAX_USERNAME_LENGTH = 30
+private const val MAX_BIO_LENGTH = 160
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -119,7 +126,8 @@ fun EditProfileRoute(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(24.dp),
+                        .verticalScroll(rememberScrollState())
+                        .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Spacer(modifier = Modifier.height(16.dp))
@@ -163,33 +171,54 @@ fun EditProfileRoute(
 
                     OutlinedTextField(
                         value = viewModel.name,
-                        onValueChange = viewModel::onNameChanged,
+                        onValueChange = { if (it.length <= MAX_NAME_LENGTH) viewModel.onNameChanged(it) },
                         label = { Text("Nombre") },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        singleLine = true,
+                        supportingText = {
+                            Text(
+                                text = "${viewModel.name.length}/$MAX_NAME_LENGTH",
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.End
+                            )
+                        }
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
                     OutlinedTextField(
                         value = viewModel.username,
-                        onValueChange = viewModel::onUsernameChanged,
+                        onValueChange = { if (it.length <= MAX_USERNAME_LENGTH) viewModel.onUsernameChanged(it) },
                         label = { Text("Nombre de usuario") },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        singleLine = true,
+                        supportingText = {
+                            Text(
+                                text = "${viewModel.username.length}/$MAX_USERNAME_LENGTH",
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.End
+                            )
+                        }
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
                     OutlinedTextField(
                         value = viewModel.bio,
-                        onValueChange = viewModel::onBioChanged,
+                        onValueChange = { if (it.length <= MAX_BIO_LENGTH) viewModel.onBioChanged(it) },
                         label = { Text("Biografía") },
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(min = 120.dp),
                         minLines = 3,
-                        maxLines = 5
+                        maxLines = 5,
+                        supportingText = {
+                            Text(
+                                text = "${viewModel.bio.length}/$MAX_BIO_LENGTH",
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.End
+                            )
+                        }
                     )
                 }
             }
