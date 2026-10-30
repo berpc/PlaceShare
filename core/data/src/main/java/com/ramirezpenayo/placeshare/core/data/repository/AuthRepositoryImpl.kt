@@ -20,6 +20,24 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun signUpWithEmail(email: String, password: String): Result<Unit> {
+        return try {
+            auth.createUserWithEmailAndPassword(email.trim(), password.trim()).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun signInWithEmail(email: String, password: String): Result<Unit> {
+        return try {
+            auth.signInWithEmailAndPassword(email.trim(), password.trim()).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override fun getCurrentUserUid(): String? = auth.currentUser?.uid
 
     override fun getCurrentUserEmail(): String? = auth.currentUser?.email
