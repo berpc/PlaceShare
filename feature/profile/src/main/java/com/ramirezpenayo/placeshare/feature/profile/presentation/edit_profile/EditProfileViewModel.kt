@@ -1,5 +1,8 @@
 package com.ramirezpenayo.placeshare.feature.profile.presentation.edit_profile
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -10,16 +13,19 @@ import com.ramirezpenayo.placeshare.core.domain.model.DomainError
 import com.ramirezpenayo.placeshare.core.domain.repository.AuthRepository
 import com.ramirezpenayo.placeshare.core.domain.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
 @HiltViewModel
 class EditProfileViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<EditProfileUiState>(EditProfileUiState.Idle)
@@ -88,7 +94,13 @@ class EditProfileViewModel @Inject constructor(
                 return@launch
             }
 
-            val finalPhotoUrl = selectedImageUri?.toString() ?: currentPhotoUrl
+            val imageBytes = selectedImageUri?.let { uri ->
+                try {
+                    uriToJpegBytes(context, uri)
+                } catch (e: Exception) {
+                    null
+                }
+            }
 
             val profileResult = userRepository.getUserProfile(uid)
             val currentUser = profileResult.getOrNull()
@@ -101,11 +113,10 @@ class EditProfileViewModel @Inject constructor(
             val updatedUser = currentUser.copy(
                 name = name.trim(),
                 username = username.trim(),
-                bio = bio.trim(),
-                photoUrl = finalPhotoUrl
+                bio = bio.trim()
             )
 
-            val result = userRepository.updateUser(updatedUser)
+            val result = userRepository.updateUser(updatedUser, imageBytes)
 
             result.fold(
                 onSuccess = {
@@ -119,5 +130,15 @@ class EditProfileViewModel @Inject constructor(
                 }
             )
         }
+    }
+
+    private fun uriToJpegBytes(context: Context, uri: Uri): ByteArray {
+        val input = context.contentResolver.openInputStream(uri)
+            ?: throw IllegalStateException("No se pudo abrir la imagen")
+        val bitmap = input.use { BitmapFactory.decodeStream(it) }
+            ?: throw IllegalStateException("Imagen no válida")
+        val out = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 85, out)
+        return out.toByteArray()
     }
 }

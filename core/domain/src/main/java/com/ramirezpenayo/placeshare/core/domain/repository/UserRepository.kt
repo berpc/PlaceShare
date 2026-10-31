@@ -7,7 +7,7 @@ interface UserRepository {
     suspend fun getUserProfile(userId: String): Result<User>
     suspend fun createOrUpdateUser(user: User): Result<Unit>
     suspend fun getOrCreateUser(uid: String, name: String?, email: String?, photoUrl: String?): Result<User>
-    suspend fun updateUser(user: User): Result<Unit>
+    suspend fun updateUser(user: User, imageBytes: ByteArray? = null): Result<Unit>
     suspend fun updateThemeColor(themeColor: String): Result<Unit>
     fun getCurrentUserFlow(): Flow<User?>
 }

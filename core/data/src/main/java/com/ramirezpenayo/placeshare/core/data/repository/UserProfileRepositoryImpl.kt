@@ -8,6 +8,7 @@ import com.ramirezpenayo.placeshare.core.data.mapper.toFirestoreMap
 import com.ramirezpenayo.placeshare.core.data.mapper.toUser
 import com.ramirezpenayo.placeshare.core.domain.model.User
 import com.ramirezpenayo.placeshare.core.domain.repository.UserRepository
+import com.ramirezpenayo.placeshare.core.network.CloudinaryUploader
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -16,7 +17,8 @@ import javax.inject.Inject
 
 class UserRepositoryImpl @Inject constructor(
     private val firestore: FirebaseFirestore,
-    private val auth: FirebaseAuth
+    private val auth: FirebaseAuth,
+    private val uploader: CloudinaryUploader
 ) : UserRepository {
 
     override suspend fun getUserProfile(uid: String): Result<User> {
@@ -80,11 +82,14 @@ class UserRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateUser(user: User): Result<Unit> {
+    override suspend fun updateUser(user: User, imageBytes: ByteArray?): Result<Unit> {
         return try {
+            val photoUrl = imageBytes?.let { uploader.subirImagen(it) } ?: user.photoUrl
+            val updatedUser = user.copy(photoUrl = photoUrl)
+
             firestore.collection("users")
-                .document(user.uid)
-                .set(user.toFirestoreMap())
+                .document(updatedUser.uid)
+                .set(updatedUser.toFirestoreMap())
                 .await()
             Result.success(Unit)
         } catch (e: Exception) {
